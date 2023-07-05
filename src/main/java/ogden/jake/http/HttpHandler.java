@@ -8,7 +8,7 @@ import java.net.Socket;
 
 
 public class HttpHandler implements Handler{
-    public final String rootdirectory;
+    public String rootdirectory;
     public static int port;
     public Socket socket;
     public String resource;
@@ -102,7 +102,7 @@ public class HttpHandler implements Handler{
         File indexFile2 = new File(rootdirectory, "index.html");
         fileExists(out, indexFile, resource);
         fileExists(out, indexFile2, rootdirectory);
-        File potentialDirectory = new File(resource);
+        File potentialDirectory = new File(rootdirectory + resource);
         fileOrDirectory(potentialDirectory, out);
     }
 
@@ -140,7 +140,7 @@ public class HttpHandler implements Handler{
 
     private static void directoryLink(StringBuilder listing, File file) {
         String subdirectoryPath = file.getPath();
-        listing.append("<li><a href=\"http://localhost:" + port + "/")
+        listing.append("<li><a href=\"http://localhost:" +  port + "/")
                 .append(subdirectoryPath).append("\">").append(file.getName()).
                 append("/</a></li>");
     }

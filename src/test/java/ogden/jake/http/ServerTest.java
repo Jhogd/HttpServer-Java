@@ -3,11 +3,9 @@ package ogden.jake.http;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,7 +17,7 @@ class ServerTest {
     @BeforeEach
     void setup() {
         handler = new MockHandler();
-        server = new Server(handler, 123);
+        server = new Server(handler, 123, "/");
     }
 
     @AfterEach
@@ -31,6 +29,7 @@ class ServerTest {
     void creation(){
         assertEquals(handler, server.handler);
         assertEquals(123, server.port);
+        assertEquals("/", server.rootDirectory);
     }
 
 
@@ -58,7 +57,8 @@ class ServerTest {
     @Test
     void connection () throws IOException, InterruptedException {
         server.start();
-        Socket socket = new Socket("localhost", 123);
+        try (Socket socket = new Socket("localhost", 123)) {
+        }
         Thread.sleep(10);
         assertNotNull(handler.socket);
         assertTrue(handler.wasCalled);
@@ -90,8 +90,8 @@ class ServerTest {
         Server newserver = server.commandParse(args);
         Server thirdServer = server.commandParse(newArgs);
         assertEquals(124, newserver.port);
-       // assertEquals("/src/test", newserver.rootDirectory);
-        //assertEquals("/src/main", thirdServer.rootDirectory);
+        assertEquals("/src/test", newserver.rootDirectory);
+        assertEquals("/src/main", thirdServer.rootDirectory);
 
     }
 

@@ -16,9 +16,10 @@ public class Server {
     public Handler handler;
     private ServerSocket serversocket;
 
-    public Server(Handler handler, int port) {
+    public Server(Handler handler, int port, String rootDirectory) {
         this.handler = handler;
         this.port = port;
+        this.rootDirectory = rootDirectory;
     }
 
     public void start() {
@@ -91,7 +92,7 @@ public class Server {
         port = getPort(args, port);
         rootDirectory = getDirectory(args, rootDirectory);
         handler = new HttpHandler(rootDirectory, port);
-        server = new Server(handler, port);
+        server = new Server(handler, port, rootDirectory);
         return server;
     }
 

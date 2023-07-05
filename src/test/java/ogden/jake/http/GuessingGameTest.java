@@ -13,10 +13,10 @@ class GuessingGameTest {
     setup() throws IOException {
        OutputStream out = new ByteArrayOutputStream();
        GuessingGame.initGameResponse(out);
-       System.out.println(GuessingGame.randomMap);
        int rand = GuessingGame.randomMap.get(1);
        assertTrue(rand < 101);
        assertTrue(rand > 0);
+       assertEquals(GuessingGame.formatGameHtml("Guessing Game", "Guess a number between 1 and 100", 1, 1), out.toString());
 
     }
 
@@ -69,7 +69,7 @@ class GuessingGameTest {
                 "<html><body><h1>Game Over</h1>" +
                 "<p>Sorry you have ran out of attempts to guess. </p>" +
                 "<p> The number was: " + 87 + "<p>" + "</body></html>";
-        assertTrue(out.toString().equals(response));
+        assertEquals(out.toString(), response);
     }
     @Test
     void

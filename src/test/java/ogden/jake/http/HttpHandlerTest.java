@@ -52,7 +52,6 @@ class HttpHandlerTest {
         httpHandler.handleStreams(bRead, output);
         String out = output.toString();
         String subOut = "This is the idex.html file";
-        System.out.println(out);
         assertTrue(out.contains(subOut));
     }
 
@@ -65,7 +64,6 @@ class HttpHandlerTest {
         BufferedReader buffer = new BufferedReader(new InputStreamReader(input));
         otherHandler.handleStreams(buffer, output);
         String out = output.toString();
-        System.out.println(out);
         String sub = "Welcome!";
         assertTrue(out.contains(sub));
     }
@@ -104,7 +102,7 @@ class HttpHandlerTest {
    }
 
    @Test
-    void serveIndexorRoot() throws IOException {
+    void serveIndex() throws IOException {
        OutputStream output = new ByteArrayOutputStream();
        httpHandler.resource = "/";
        httpHandler.serveIndexPageOrDirectory(output);
@@ -112,6 +110,14 @@ class HttpHandlerTest {
        String subOut = "This is the idex.html file";
        assertTrue(out.contains(subOut));
    }
+
+    @Test
+    void serveRoot() throws IOException {
+        OutputStream output = new ByteArrayOutputStream();
+        httpHandler.resource = "/Users/jakeogden/httpTests";
+        httpHandler.serveIndexPageOrDirectory(output);
+        assertTrue(output.toString().contains("/Users/jakeogden/httpTests"));
+    }
 
    @Test
     void servewelcome() throws IOException {

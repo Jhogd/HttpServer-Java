@@ -39,21 +39,19 @@ public class GuessingGame {
 
     public static void processGuess(String resource, OutputStream out) throws IOException {
         HashMap<String, Integer> gameValues = parseInput(resource);
-        boolean gameOver = false;
         int maxGuesses = 7;
-        String response = null;
+        String response;
         int numGuesses = gameValues.get("numGuesses");
         int guess = gameValues.get("guess");
         int gameId = gameValues.get("gameId");
         int answer = randomMap.get(gameId);
-        System.out.println(randomMap);
-       if (!gameOver && (numGuesses <= maxGuesses)) {
+    //    System.out.println(randomMap);
+       if  (numGuesses < maxGuesses) {
            if (guess == randomMap.get(gameId)) {
                response = "HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n\r\n" +
                        "<html><body><h1>Congratulations!</h1>" +
                        "<p>Total guesses: " + numGuesses + "</p>" +
                        "</body></html>";
-               gameOver = true;
            } else if (guess < answer) {
                numGuesses++;
                response = formatGameHtml("Wrong Guess!", "Your guess is too low", numGuesses, gameId);
@@ -62,7 +60,7 @@ public class GuessingGame {
                response = formatGameHtml("Wrong Guess!", "Your guess is too high", numGuesses, gameId);
            }
        }
-       if (numGuesses > maxGuesses) {
+       else {
            response = "HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n\r\n" +
                    "<html><body><h1>Game Over</h1>" +
                    "<p>Sorry you have ran out of attempts to guess. </p>" +
