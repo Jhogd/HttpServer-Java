@@ -2,8 +2,6 @@ package ogden.jake.http;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import javax.print.DocFlavor;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.io.*;
@@ -80,7 +78,6 @@ class HttpHandlerTest {
         ByteArrayInputStream input = new ByteArrayInputStream(request.getBytes());
         BufferedReader buffer = new BufferedReader(new InputStreamReader(input));
         otherHandler.handleStreams(buffer, output);
-        String out = output.toString();
         LocalDateTime currentTime =LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String time = currentTime.format(formatter);
@@ -109,10 +106,10 @@ class HttpHandlerTest {
    @Test
     void serveIndexorRoot() throws IOException {
        OutputStream output = new ByteArrayOutputStream();
+       httpHandler.resource = "/";
        httpHandler.serveIndexPageOrDirectory(output);
        String out = output.toString();
        String subOut = "This is the idex.html file";
-        //System.out.println(out);
        assertTrue(out.contains(subOut));
    }
 
@@ -121,7 +118,7 @@ class HttpHandlerTest {
        OutputStream output = new ByteArrayOutputStream();
        httpHandler.serveWelcomePage(output);
        String out = output.toString();
-       String expected = "HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n\r\n"
+       String expected = "HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n" +"\r\n"
                + "<html><body><h1>Welcome!</h1></body></html>";
        assertEquals(expected, out);
    }
@@ -133,10 +130,8 @@ class HttpHandlerTest {
        LocalDateTime currentTime =LocalDateTime.now();
        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
        String time = currentTime.format(formatter);
-       System.out.println(output.toString());
        assertTrue(output.toString().contains(time));
 
-       //;; https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/Getting_started#anatomy_of_an_html_document
    }
 
    @Test

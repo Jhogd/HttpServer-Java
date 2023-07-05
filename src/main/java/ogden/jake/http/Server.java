@@ -16,10 +16,9 @@ public class Server {
     public Handler handler;
     private ServerSocket serversocket;
 
-    public Server(Handler handler, int port, String rootDir) {
+    public Server(Handler handler, int port) {
         this.handler = handler;
         this.port = port;
-        this.rootDirectory = rootDir;
     }
 
     public void start() {
@@ -41,7 +40,6 @@ public class Server {
                     }
                 });
                 clientThread.start();
-//                clientSocket.close();
             }
         } catch (SocketException e) {
             if(running) {
@@ -60,7 +58,6 @@ public class Server {
             while(thread.isAlive()) {
                 if(serversocket != null)
                     serversocket.close();
-//                thread.interrupt();
                 Thread.yield();
             }
             thread = null;
@@ -68,28 +65,38 @@ public class Server {
     }
 
 
-    public static Server commandParse(String[] args){
+    public static int getPort(String[] args, int port) {
+        int index;
+        if (Arrays.asList(args).contains("-p")) {
+            index = Arrays.asList(args).indexOf("-p") + 1;
+            port = Integer.parseInt(args[index]);
+        }
+        return port;
+    }
+
+    public static String getDirectory(String[] args, String rootDirectory) {
+        int index;
+        if (Arrays.asList(args).contains("-r")) {
+            index = Arrays.asList(args).indexOf("-r") + 1;
+            rootDirectory = args[index];
+        }
+        return rootDirectory;
+    }
+
+    public static Server commandParse(String[] args) {
         Server server;
         Handler handler;
         int port = default_port;
-        int index;
         String rootDirectory = default_root_directory;
-       if (Arrays.asList(args).contains("-p")){
-           index = Arrays.asList(args).indexOf("-p") + 1;
-           port = Integer.parseInt(args[index]);
-       }
-       if (Arrays.asList(args).contains("-r")) {
-           index = Arrays.asList(args).indexOf("-r") + 1;
-           rootDirectory = args[index];
-       }
-       handler = new HttpHandler(rootDirectory, port);
-       server = new Server(handler, port, rootDirectory);
-    return server;
+        port = getPort(args, port);
+        rootDirectory = getDirectory(args, rootDirectory);
+        handler = new HttpHandler(rootDirectory, port);
+        server = new Server(handler, port);
+        return server;
     }
 
     public static void main(String [] args){
        Server server;
-       System.out.println(Arrays.toString(args));
        server = commandParse(args);
        server.start();
        String message = "Running on port: " + server.port;
