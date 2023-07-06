@@ -1,4 +1,6 @@
 package ogden.jake.http;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -13,7 +15,7 @@ public class HttpHandler implements Handler{
     public Socket socket;
     public String resource;
 
-    public HttpHandler(String rootdirectory, int port) {
+    public HttpHandler(String rootdirectory, int port) throws URISyntaxException {
         this.rootdirectory = htmlDecode(rootdirectory);
         this.port = port;
 
@@ -29,8 +31,13 @@ public class HttpHandler implements Handler{
     }
     }
 
+    public static String htmlHeader(String contentType){
+        return "HTTP/1.1 200 OK\r\n" + "Content-Type: " + contentType + "\r\n";
+    }
+
     public void handleStreams(BufferedReader input, OutputStream output) throws IOException, InterruptedException {
         Request newRequest = new Request(input);
+
         try {
             newRequest.getPieces();
         } catch (NullPointerException ignored) {
@@ -38,10 +45,12 @@ public class HttpHandler implements Handler{
         try {
             this.resource = htmlDecode(newRequest.resource);
         } catch (NullPointerException ignored) {
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
-        if (newRequest.method.equals("GET")) {
-            if (resource.contains("game?")) {
-                GuessingGame.processGuess(resource, output);
+        if ("GET".equals(newRequest.method)) {
+            if (newRequest.resource.contains("game?")) {
+                GuessingGameHtml.processGameHtml(newRequest.resource, output);
             } else {
                 switch (resource) {
                     case "/hello" -> serveWelcomePage(output);
@@ -55,17 +64,17 @@ public class HttpHandler implements Handler{
     }
 
     public void serveWelcomePage(OutputStream out) throws IOException {
-        String response = "HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n" +
+        String response = htmlHeader("text/html") +
                   "\r\n"
                 + "<html><body><h1>Welcome!</h1></body></html>";
         out.write(response.getBytes());
     }
     
-    public void fileHtml(String fileType, File file, OutputStream out) throws IOException {
+    public void readFile(String fileType, File file, OutputStream out) throws IOException {
         Path filePath = file.toPath();
         byte[] fileBytes = Files.readAllBytes(filePath);
-       String response = "HTTP/1.1 200 OK\r\n" + "Content-Type: " +fileType + "\r\n"
-                + "Content-Length:" + fileBytes.length + "\r\n" +
+       String response = htmlHeader(fileType) +
+                 "Content-Length:" + fileBytes.length + "\r\n" +
                 "\r\n";
         out.write(response.getBytes());
         out.write(fileBytes);
@@ -76,7 +85,7 @@ public class HttpHandler implements Handler{
         if (fileType == null){
             fileType = "application/octect-stream";
         }
-        fileHtml(fileType, file, out);
+        readFile(fileType, file, out);
     }
 
     public void fileExists(OutputStream out, File indexFile, String path) throws IOException {
@@ -90,20 +99,23 @@ public class HttpHandler implements Handler{
         if (potentialDirectory.isFile()) {
             sendFileResponse(out, potentialDirectory);
         } else {
-            if (rootdirectory.length() > resource.length()) {
-                resource = rootdirectory;
-            }
+
             listFilesinRoot(out, new File(resource));
         }
     }
     
     public void serveIndexPageOrDirectory(OutputStream out) throws IOException {
-        File indexFile = new File(resource, "index.html");
-        File indexFile2 = new File(rootdirectory, "index.html");
+      if (rootdirectory.length() > resource.length())  {
+          resource = rootdirectory + resource;
+      }
+      if (rootdirectory.equals(".")){
+          resource = rootdirectory;
+      }
+        System.out.println(resource);
+        File indexFile = new File(resource ,"index.html");
         fileExists(out, indexFile, resource);
-        fileExists(out, indexFile2, rootdirectory);
-        File potentialDirectory = new File(rootdirectory + resource);
-        fileOrDirectory(potentialDirectory, out);
+        File fileOrDirectory = new File(resource);
+        fileOrDirectory(fileOrDirectory, out);
     }
 
     public void listFilesinRoot(OutputStream out, File directory) throws IOException {
@@ -112,14 +124,14 @@ public class HttpHandler implements Handler{
         listing.append("</ul></body></ul>");
         String parentDirectoryPath = directory.getParent();
         listing.append("<li><a href=\"").append(parentDirectoryPath).append("\">[Parent Directory]</a></li>");
-        assert files != null;
+        assert  files != null;
         makeLinks(files, listing);
         sendLinkResponse(out, listing);
     }
 
     private static void sendLinkResponse(OutputStream out, StringBuilder listing) throws IOException {
         listing.append("</ul></body></html>");
-        String response = "HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n"
+        String response = htmlHeader("text/html")
                 + "Content-Length: " + listing.length() + "\r\n" + "\r\n" +
                 listing;
         out.write(response.getBytes());
@@ -140,39 +152,32 @@ public class HttpHandler implements Handler{
 
     private static void directoryLink(StringBuilder listing, File file) {
         String subdirectoryPath = file.getPath();
-        listing.append("<li><a href=\"http://localhost:" +  port + "/")
+        listing.append("<li><a href=\"")
                 .append(subdirectoryPath).append("\">").append(file.getName()).
                 append("/</a></li>");
     }
 
     private static void fileLink(StringBuilder listing, File file) {
-        String fileURL = file.toURI().toString();
-        int index = fileURL.indexOf(":") + 1;
-        fileURL = fileURL.substring(index);
-        listing.append("<li><a target='_blank' href='").append("http://localhost:" + port).
-                append(fileURL + "'>" + file.getName() + "</a></li>");
+        listing.append("<li><a target='_blank' href='").append(file.getPath()).
+                append("'>").append(file.getName()).append("</a></li>");
     }
 
     public void servePingResponse(OutputStream out) throws InterruptedException, IOException {
         Thread.sleep(1000);
-        LocalDateTime currentTime =LocalDateTime.now();
+        LocalDateTime currentTime = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String response = "HTTP/1.1 200 OK\r\n" + "Content-Type: text/plain\r\n\r\n"
+        String response =  htmlHeader("text/plain") + "\r\n"
                 + "Current Time: " + currentTime.format(formatter);
         out.write(response.getBytes());
 
     }
 
-    public static String htmlDecode(String resource) {
-        String sub = "%20";
-        if (resource.contains(sub)) {
-            return resource.replaceAll("%20", " ");
-        }
-        return resource;
+    public static String htmlDecode(String resource) throws URISyntaxException {
+    return new URI(resource).getPath();
     }
 
     public void serveGuessingGame(OutputStream out) throws IOException {
-        GuessingGame.initGameResponse(out);
+        GuessingGameHtml.initGameHtml(out);
     }
 
     }

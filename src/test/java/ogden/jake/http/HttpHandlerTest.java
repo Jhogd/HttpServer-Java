@@ -2,6 +2,8 @@ package ogden.jake.http;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.io.*;
@@ -14,7 +16,7 @@ class HttpHandlerTest {
     private BufferedReader bRead;
     private MockHandler mockhandler;
     @BeforeEach
-    void setup() {
+    void setup() throws URISyntaxException {
         httpHandler = new HttpHandler("/Users/jakeogden/httpTests/testStuff", 123);
         String requestString = "GET " + "/" + " HTTP/1.1\r\n\r\n\r\n";
         ByteArrayInputStream input = new ByteArrayInputStream(requestString.getBytes());
@@ -56,7 +58,7 @@ class HttpHandlerTest {
     }
 
     @Test
-    void handleStream2() throws IOException, InterruptedException {
+    void handleStream2() throws IOException, InterruptedException, URISyntaxException {
         HttpHandler otherHandler = new HttpHandler("/", 123);
         OutputStream output = new ByteArrayOutputStream();
         String request = "GET " + "/hello" + " HTTP/1.1\r\n\r\n\r\n";
@@ -70,7 +72,7 @@ class HttpHandlerTest {
 
     @Test
     void handleStream3() throws IOException, InterruptedException {
-        HttpHandler otherHandler = new HttpHandler("/", 123);
+        MockHandler otherHandler = new MockHandler();
         OutputStream output = new ByteArrayOutputStream();
         String request = "GET " + "/ping" + " HTTP/1.1\r\n\r\n\r\n";
         ByteArrayInputStream input = new ByteArrayInputStream(request.getBytes());
@@ -114,7 +116,7 @@ class HttpHandlerTest {
     @Test
     void serveRoot() throws IOException {
         OutputStream output = new ByteArrayOutputStream();
-        httpHandler.resource = "/Users/jakeogden/httpTests";
+        httpHandler.resource = "/Users/jakeogden/httpTests/testStuff";
         httpHandler.serveIndexPageOrDirectory(output);
         assertTrue(output.toString().contains("/Users/jakeogden/httpTests"));
     }
@@ -132,7 +134,8 @@ class HttpHandlerTest {
    @Test
     void pingResponse() throws IOException, InterruptedException {
        OutputStream output = new ByteArrayOutputStream();
-       httpHandler.servePingResponse(output);
+       MockHandler mockHandle = new MockHandler();
+       mockHandle.servePingResponse(output);
        LocalDateTime currentTime =LocalDateTime.now();
        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
        String time = currentTime.format(formatter);
@@ -142,7 +145,7 @@ class HttpHandlerTest {
 
    @Test
     void
-    decode(){
+    decode() throws URISyntaxException {
         assertEquals("Photo Booth Library", HttpHandler.htmlDecode("Photo%20Booth%20Library"));
         assertEquals("Abstract factory.key", HttpHandler.htmlDecode("Abstract%20factory.key"));
         assertEquals("Screenshot 2023-06-19 at 8.08.38 AM.png", HttpHandler.htmlDecode("Screenshot%202023-06-19%20at%208.08.38%20AM.png"));

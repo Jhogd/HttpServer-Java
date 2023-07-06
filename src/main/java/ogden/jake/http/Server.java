@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 
 public class Server {
@@ -84,19 +85,16 @@ public class Server {
         return rootDirectory;
     }
 
-    public static Server commandParse(String[] args) {
-        Server server;
-        Handler handler;
+    public static Server commandParse(String[] args) throws URISyntaxException {
         int port = default_port;
         String rootDirectory = default_root_directory;
         port = getPort(args, port);
         rootDirectory = getDirectory(args, rootDirectory);
-        handler = new HttpHandler(rootDirectory, port);
-        server = new Server(handler, port, rootDirectory);
-        return server;
+        Handler handler = new HttpHandler(rootDirectory, port);
+        return new Server(handler, port, rootDirectory);
     }
 
-    public static void main(String [] args){
+    public static void main(String [] args) throws URISyntaxException {
        Server server;
        server = commandParse(args);
        server.start();

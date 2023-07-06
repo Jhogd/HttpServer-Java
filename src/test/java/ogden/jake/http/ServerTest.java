@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,8 +58,7 @@ class ServerTest {
     @Test
     void connection () throws IOException, InterruptedException {
         server.start();
-        try (Socket socket = new Socket("localhost", 123)) {
-        }
+        Socket socket = new Socket("localhost", 123);
         Thread.sleep(10);
         assertNotNull(handler.socket);
         assertTrue(handler.wasCalled);
@@ -84,15 +84,19 @@ class ServerTest {
     }
 
     @Test
-    void commandLine() {
-        String[] args = new String[]{"-p", "124", "-r", "/src/test"};
-        String[] newArgs = new String[]{"-p", "127", "-r", "/src/main"};
-        Server newserver = server.commandParse(args);
-        Server thirdServer = server.commandParse(newArgs);
-        assertEquals(124, newserver.port);
-        assertEquals("/src/test", newserver.rootDirectory);
-        assertEquals("/src/main", thirdServer.rootDirectory);
+    void commandLineNoArgs() throws URISyntaxException {
+        String[] args = new String[]{};
+        Server newserver = Server.commandParse(args);
+        assertEquals(80, newserver.port);
+        assertEquals(".", newserver.rootDirectory);
+    }
 
+    @Test
+    void commandLineWithPortAndRoot() throws URISyntaxException {
+        String[] newArgs = new String[]{"-p", "127", "-r", "/src/main"};
+        Server thirdServer = Server.commandParse(newArgs);
+        assertEquals(127, thirdServer.port);
+        assertEquals("/src/main", thirdServer.rootDirectory);
     }
 
 }
