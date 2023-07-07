@@ -5,9 +5,19 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 
-public class GuessingGameHtml {
+public class GuessingGameHtml implements Serve {
 
-    public static void initGameHtml(OutputStream out) throws IOException {
+
+    @Override
+    public void sendResponse(OutputStream out, String resource) throws InterruptedException, IOException {
+        if (resource.contains("game?")) {
+            out.write(processGameHtml(resource).getBytes());
+        } else {
+            initGameResponse(out);
+        }
+    }
+
+    public void initGameResponse(OutputStream out) throws InterruptedException, IOException {
         int gameId = GuessingGame.initGameResponse();
         String response = formatGameHtml("Guessing Game", "Guess a number between 1 and 100", 1, gameId);
         out.write(response.getBytes());
@@ -34,8 +44,8 @@ public class GuessingGameHtml {
                 "</form>" + "</body></html>";
     }
 
-   public static void processGameHtml(String resource, OutputStream out) throws IOException {
-       HashMap<String, Integer> gameValues = GuessingGameHtml.parseInput(resource);
+   public static String processGameHtml(String resource) throws IOException {
+       HashMap<String, Integer> gameValues = parseInput(resource);
        String response = null;
        int numGuesses = gameValues.get("numGuesses");
        int guess = gameValues.get("guess");
@@ -62,6 +72,7 @@ public class GuessingGameHtml {
                    "<p>Sorry you have ran out of attempts to guess. </p>" +
                    "<p> The number was: " + GuessingGame.randomMap.get(gameId) + "<p>" + "</body></html>";
        }
-    out.write(response.getBytes());
+   return response;
    }
+
 }

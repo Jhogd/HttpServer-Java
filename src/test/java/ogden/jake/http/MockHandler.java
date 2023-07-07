@@ -20,6 +20,11 @@ public class MockHandler implements Handler {
 
     }
 
+    @Override
+    public void addServe(String resource, Serve app) {
+
+    }
+
     public void handleStreams(BufferedReader input, OutputStream output) throws IOException, InterruptedException {
         Request newRequest = new Request(input);
         try {

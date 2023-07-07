@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -83,20 +84,21 @@ class ServerTest {
         assertEquals("Hi I am Jake", mockinput.read);
     }
 
-    @Test
-    void commandLineNoArgs() throws URISyntaxException {
-        String[] args = new String[]{};
-        Server newserver = Server.commandParse(args);
-        assertEquals(80, newserver.port);
-        assertEquals(".", newserver.rootDirectory);
-    }
+  @Test
+  void commandLineNoArgs() throws URISyntaxException {
+      String[] args = new String[]{};
+      Server newserver = Server.commandParse(args);
+      assertEquals(80, newserver.port);
+      assertEquals(".", newserver.rootDirectory);
+  }
 
-    @Test
-    void commandLineWithPortAndRoot() throws URISyntaxException {
-        String[] newArgs = new String[]{"-p", "127", "-r", "/src/main"};
-        Server thirdServer = Server.commandParse(newArgs);
-        assertEquals(127, thirdServer.port);
-        assertEquals("/src/main", thirdServer.rootDirectory);
-    }
+
+ @Test
+ void commandLineWithPortAndRoot() throws URISyntaxException {
+     String[] newArgs = new String[]{"-p", "127", "-r", "/src/main"};
+     Server thirdServer = Server.commandParse(newArgs);
+     assertEquals(127, thirdServer.port);
+     assertEquals("/src/main", thirdServer.rootDirectory);
+ }
 
 }
