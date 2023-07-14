@@ -10,7 +10,7 @@ import static ogden.jake.http.HttpHandler.htmlHeader;
 public class pingResponse implements Serve{
 
     @Override
-    public void sendResponse(OutputStream out, String resource) throws InterruptedException, IOException {
+    public void sendResponse(OutputStream out, String resource, String data) throws InterruptedException, IOException {
         Thread.sleep(1000);
         LocalDateTime currentTime = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

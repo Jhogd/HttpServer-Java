@@ -15,9 +15,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class HttpHandlerTest {
     private HttpHandler httpHandler;
     private HttpHandler otherHandler;
-    private Request newRequest;
+    private GetRequest newGetRequest;
     private BufferedReader bRead;
     private MockHandler mockhandler;
+
     @BeforeEach
     void setup() throws URISyntaxException {
         HashMap<String, Serve> serveMap = new HashMap<>();
@@ -26,7 +27,7 @@ class HttpHandlerTest {
         String requestString = "GET " + "/" + " HTTP/1.1\r\n\r\n\r\n";
         ByteArrayInputStream input = new ByteArrayInputStream(requestString.getBytes());
         bRead = new BufferedReader(new InputStreamReader(input));
-        newRequest = new Request(bRead);
+        newGetRequest = new GetRequest(bRead);
     }
 
     @Test
@@ -55,14 +56,25 @@ class HttpHandlerTest {
 
     @Test
     void readRequest() throws IOException {
-        newRequest.getPieces();
-        assertEquals("GET" , newRequest.method);
-        assertEquals("/", newRequest.resource);
-        assertEquals("HTTP/1.1", newRequest.version);
+        newGetRequest.getPieces();
+        assertEquals("GET" , newGetRequest.method);
+        assertEquals("/", newGetRequest.resource);
+        assertEquals("HTTP/1.1", newGetRequest.version);
     }
 
     @Test
-    void handleStream() throws IOException, InterruptedException {
+    void postReader() throws IOException {
+        String input = "Host: localhost\r\nConnection: keep-alive\r\nContent-Length: 35\r\nCache-Control: max-age=0\r\nsec-ch-ua: \"Not.A/Brand\";v=\"8\"\r\n\"Chromium\";v=\"114\"\r\n \"Google Chrome\";v=\"114\"\r\n sec-ch-ua-mobile: ?0\r\nsec-ch-ua-platform: \"macOS\"\r\nUpgrade-Insecure-Requests: 1\r\nOrigin: http://localhost\r\nContent-Type: application/x-www-form-urlencoded\r\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML like Gecko) Chrome/114.0.0.0 Safari/537.36\r\n Accept: text/html\r\napplication/xhtml+xml\r\napplication/xml;q=0.9\r\nimage/avif\r\nimage/webp\r\nimage/apng\r\n*/*;q=0.8\r\napplication/signed-exchange;v=b3;q=0.7\r\n Sec-Fetch-Site: same-origin\r\nSec-Fetch-Mode: navigate\r\nSec-Fetch-User: ?1\r\nSec-Fetch-Dest: document\r\nReferer: http://localhost/game\r\nAccept-Encoding: gzip\r\n deflate\r\n br\r\nAccept-Language: en-US\r\nen;\r\n\r\nq=0.9numGuesses=1&gameId=0&guess=10";
+        ByteArrayInputStream byteInput = new ByteArrayInputStream(input.getBytes());
+        BufferedReader newBuffer = new BufferedReader(new InputStreamReader(byteInput));
+        PostRequest another = new PostRequest(newBuffer);
+        another.getPieces();
+        assertEquals(35 , another.contentLength);
+        assertEquals("q=0.9numGuesses=1&gameId=0&guess=10" , another.queryResult);
+ }
+
+    @Test
+    void handleStream() throws IOException,  InterruptedException {
         OutputStream output = new ByteArrayOutputStream();
         httpHandler.handleStreams(bRead, output);
         String out = output.toString();

@@ -2,16 +2,15 @@ package ogden.jake.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Arrays;
 
-public class Request {
+public class GetRequest {
 
     public BufferedReader input;
     public String method;
     public String resource;
     public String version;
 
-    public Request(BufferedReader input){
+    public GetRequest(BufferedReader input){
         this.input = input;
     }
 

@@ -14,14 +14,14 @@ class GuessingGameHtmlTest {
     OutputStream out = new ByteArrayOutputStream();
     GuessingGameHtml testGame = new GuessingGameHtml();
     testGame.initGameResponse(out);
-    assertEquals(GuessingGameHtml.formatGameHtml("Guessing Game", "Guess a number between 1 and 100", 1, 0), out.toString());
+    assertEquals(GuessingGameHtml.formatGameHtml("Guessing Game", "Guess a number between 1 and 100", 1, 1), out.toString());
 
 }
 
 @Test
 void
 parseString(){
-    HashMap<String, Integer> values =GuessingGameHtml.parseInput("/game?numGuesses=1&gameId=0&guess=5");
+    HashMap<String, Integer> values =GuessingGameHtml.parseInput("numGuesses=1&gameId=0&guess=5");
     assertEquals(5, values.get("guess"));
     assertEquals(1, values.get("numGuesses"));
     assertEquals(0, values.get("gameId"));

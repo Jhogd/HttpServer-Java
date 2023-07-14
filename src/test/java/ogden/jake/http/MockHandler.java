@@ -26,16 +26,16 @@ public class MockHandler implements Handler {
     }
 
     public void handleStreams(BufferedReader input, OutputStream output) throws IOException, InterruptedException {
-        Request newRequest = new Request(input);
+        GetRequest newGetRequest = new GetRequest(input);
         try {
-            newRequest.getPieces();
+            newGetRequest.getPieces();
         } catch (NullPointerException | IOException ignored) {
         }
         try {
-            this.resource = newRequest.resource;
+            this.resource = newGetRequest.resource;
         } catch (NullPointerException ignored) {
         }
-        if ("GET".equals(newRequest.method)) {
+        if ("GET".equals(newGetRequest.method)) {
             if (resource.equals("/ping")) {
                 servePingResponse(output);
             }

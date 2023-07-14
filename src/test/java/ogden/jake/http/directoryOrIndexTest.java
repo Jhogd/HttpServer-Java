@@ -35,7 +35,7 @@ class directoryOrIndexTest {
     @Test
     void serveRoot() throws IOException, InterruptedException {
         OutputStream output = new ByteArrayOutputStream();
-        newDirectory.sendResponse(output, "/Users/jakeogden/httpTests");
+        newDirectory.sendResponse(output, "/Users/jakeogden/httpTests", "");
         assertTrue(output.toString().contains("/Users/jakeogden/httpTests"));
     }
 

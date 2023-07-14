@@ -75,19 +75,21 @@ public class Server {
 
     public static int getPort(String[] args, int port) {
         int index;
+        if (args != null){
         if (Arrays.asList(args).contains("-p")) {
             index = Arrays.asList(args).indexOf("-p") + 1;
             port = Integer.parseInt(args[index]);
-        }
+        }}
         return port;
     }
 
     public static String getDirectory(String[] args, String rootDirectory) {
         int index;
+        if (args != null){
         if (Arrays.asList(args).contains("-r")) {
             index = Arrays.asList(args).indexOf("-r") + 1;
             rootDirectory = args[index];
-        }
+        }}
         return rootDirectory;
     }
 

@@ -24,7 +24,6 @@ class GuessingGameTest {
         List<Object> result = new ArrayList<>();
         result.add(1);
         result.add("low");
-        System.out.println(GuessingGame.processGuess(0, 1, 0));
         assertEquals(result, GuessingGame.processGuess(0, 1, 0));
     }
 
@@ -34,7 +33,6 @@ class GuessingGameTest {
         List<Object> result = new ArrayList<>();
         result.add(1);
         result.add("high");
-        System.out.println(GuessingGame.processGuess(0, 80, 0));
         assertEquals(result, GuessingGame.processGuess(0, 80, 0));
     }
 
@@ -45,7 +43,6 @@ class GuessingGameTest {
         List<Object> result = new ArrayList<>();
         result.add(0);
         result.add("correct");
-        System.out.println(GuessingGame.processGuess(0, 46, 0));
         assertEquals(result, GuessingGame.processGuess(0, 46, 0));
     }
 
@@ -54,8 +51,9 @@ class GuessingGameTest {
         GuessingGame.randomMap.put(0, 46);
         List<Object> result = new ArrayList<>();
         result.add(7);
+        result.add("correct");
+        result.add(7);
         result.add("maxAttempts");
-        System.out.println(GuessingGame.processGuess(7, 46, 0));
         assertEquals(result, GuessingGame.processGuess(7, 46, 0));
     }
 

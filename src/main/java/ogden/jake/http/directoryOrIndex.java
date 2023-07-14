@@ -12,14 +12,14 @@ public class directoryOrIndex implements  Serve{
 
 
     @Override
-    public void sendResponse(OutputStream out, String resource) throws InterruptedException, IOException {
+    public void sendResponse(OutputStream out, String resource, String data) throws InterruptedException, IOException {
         File indexFile = new File(resource ,"index.html");
         fileExists(out, indexFile, resource);
         File fileOrDirectory = new File(resource);
         fileOrDirectory(fileOrDirectory, out, resource);
     }
 
-    public void readFile(String fileType, File file, OutputStream out) throws IOException {
+    public static void readFile(String fileType, File file, OutputStream out) throws IOException {
         Path filePath = file.toPath();
         byte[] fileBytes = Files.readAllBytes(filePath);
         String response = htmlHeader(fileType) +
@@ -29,7 +29,7 @@ public class directoryOrIndex implements  Serve{
         out.write(fileBytes);
     }
 
-    public void sendFileResponse(OutputStream out, File file) throws IOException {
+    public static void sendFileResponse(OutputStream out, File file) throws IOException {
         String fileType = Files.probeContentType(file.toPath());
         if (fileType == null){
             fileType = "application/octect-stream";

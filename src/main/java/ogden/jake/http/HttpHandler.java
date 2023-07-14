@@ -11,6 +11,7 @@ public class HttpHandler implements Handler{
     public Socket socket;
     public String resource;
     public final HashMap<String, Serve> serveMap;
+    public String queryResult;
 
     public HttpHandler(String rootdirectory, HashMap<String, Serve> serveMap) throws URISyntaxException {
         this.serveMap = serveMap;
@@ -30,56 +31,52 @@ public class HttpHandler implements Handler{
         handleStreams(inputReader, output);
     }
     }
-
     public static String htmlHeader(String contentType){
         return "HTTP/1.1 200 OK\r\n" + "Content-Type: " + contentType + "\r\n";
     }
 
-    public static String splitResource(String resource, HashMap<String, Serve> serveMap){
-        String partialResource = "";
-        for (String key : serveMap.keySet()){
-          if (resource.contains(key)){
-             partialResource = key;
-          }
-      }
-        return partialResource;
-    }
-
     public void handleStreams(BufferedReader input, OutputStream output) throws IOException, InterruptedException {
-        Request newRequest = new Request(input);
+        GetRequest newGetRequest = new GetRequest(input);
 
         try {
-            newRequest.getPieces();
+            newGetRequest.getPieces();
         } catch (NullPointerException ignored) {
         }
-        try {
-            this.resource = htmlDecode(newRequest.resource);
-        } catch (NullPointerException ignored) {
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+        if (newGetRequest.method.equals("GET")) {
+            try {
+                this.resource = htmlDecode(newGetRequest.resource);
+            } catch (NullPointerException ignored) {
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
         }
-        String partialResource = splitResource(resource, serveMap);
-        if ("GET".equals(newRequest.method)) {
-            if (serveMap.get(partialResource) == null) {
+        else {
+            PostRequest postRequest = new PostRequest(input);
+            postRequest.getPieces();
+            this.resource = newGetRequest.resource;
+            this.queryResult = postRequest.queryResult;
+            System.out.println(queryResult);
+
+        }
+            if (serveMap.get(resource) == null) {
                 if (rootDirectory.length() > resource.length()) {
                     resource = rootDirectory;
                 }
                 if (rootDirectory.equals(".")) {
                     resource = rootDirectory + resource;
                 }
-                new directoryOrIndex().sendResponse(output, resource);
+                new directoryOrIndex().sendResponse(output, resource, queryResult);
             } else {
-                serveMap.get(partialResource).sendResponse(output, resource);
+                serveMap.get(resource).sendResponse(output, resource, queryResult);
 
             }
-        }
+
     }
 
-
     public static String htmlDecode(String resource) throws URISyntaxException {
-        if (resource.contains("?")){
-            return resource;
-        }
+     if (resource.contains("?")){
+         return resource;
+     }
     return new URI(resource).getPath();
     }
 
